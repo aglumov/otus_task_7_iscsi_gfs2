@@ -8,7 +8,7 @@
   ansible.builtin.lineinfile:
     path: "/etc/lvm/lvm.conf"
     line: "       use_lvmlockd = 1"
-    search_string: "use_lvmlockd = 1"
+    search_string: "use_lvmlockd"
 
 - name: Set var for node list
   ansible.builtin.set_fact:
@@ -23,7 +23,6 @@
       pcs cluster setup otus_cluster {{ node_list }} --force
       pcs cluster enable --all
       pcs cluster start --all
-#      rm -rf /var/lib/corosync/ringid_*
       sleep 30
       pcs property set no-quorum-policy=freeze
       pcs property set stonith-enabled=false
@@ -83,6 +82,6 @@
 - name: Create stonith resource
   ansible.builtin.shell:
     cmd: |  
-      pcs stonith create node_fence fence_aws pcmk_host_map=\'{{ pcmk_host_map }}\' power_timeout=240 pcmk_reboot_timeout=480 pcmk_reboot_retries=4
+      pcs stonith create node_fence fence_aws pcmk_host_map='{{ pcmk_host_map }}' power_timeout=240 pcmk_reboot_timeout=480 pcmk_reboot_retries=4 verbose=1
       pcs property set stonith-enabled=true
   run_once: true

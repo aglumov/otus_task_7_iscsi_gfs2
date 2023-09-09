@@ -14,6 +14,8 @@
 
 - name: "Configure ACL for {{ item }}"
   ansible.builtin.shell:
-    cmd: "targetcli /iscsi/iqn.2023-09.ru.otus:storage.target00/tpg1/acls create iqn.2023-09.com.ubuntu:{{ item }}"
+    cmd: |
+      targetcli /iscsi/iqn.2023-09.ru.otus:storage.target00/tpg1/acls create iqn.2023-09.com.ubuntu:{{ item }}
+      targetcli saveconfig
   when: out.msg != "line replaced"
   ignore_errors: true

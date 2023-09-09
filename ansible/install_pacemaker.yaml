@@ -25,7 +25,7 @@
     path: "/root/.aws"
     state: directory
 
-- name: Setup aws cli
+- name: Copy aws cli config
   ansible.builtin.copy:
     dest: "/root/.aws/config"
     content: |
@@ -34,7 +34,7 @@
       region = US
       endpoint_url = https://api.cloud.croc.ru:443
 
-- name: Setup aws cli
+- name: Copy aws cli credentials
   ansible.builtin.copy:
     src: "aws_credentials.conf"
     dest: "/root/.aws/credentials"
