@@ -1,0 +1,35 @@
+---
+- name: Install and setup iSCSI and Pacemaker cluster
+  hosts: all
+  become: true
+
+  vars:
+    common_packages:
+    - python3-pip
+    - pcs
+    - pacemaker
+    - corosync
+    - fence-agents
+    - resource-agents-extra
+    - dlm-controld
+    - lvm2
+    - lvm2-lockd
+    - gfs2-utils
+    password: "21485b12392b4a4c957aef3decfbf7a8"
+
+  tasks:
+  - name: Install iSCSI target
+    include_tasks: "install_iscsi-target.yaml"
+    when: inventory_hostname in groups["iscsi-target"]
+ 
+  - name: Install iSCSI initiator
+    include_tasks: "install_iscsi-initiator.yaml"
+    when: inventory_hostname in groups["cluster"]
+
+  - name: Install Pacemaker packages and configure hosts
+    include_tasks: "install_pacemaker.yaml"
+    when: inventory_hostname in groups["cluster"]
+
+  - name: Configure cluster
+    include_tasks: "configure_cluster.yaml"
+    when: inventory_hostname in groups["cluster"]

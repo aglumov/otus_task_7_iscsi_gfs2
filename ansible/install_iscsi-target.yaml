@@ -1,0 +1,31 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name: targetcli-fb
+    state: latest
+    update_cache: true
+
+- name: Configure target
+  ansible.builtin.shell:
+    cmd: |
+      targetcli /backstores/block create disk01 /dev/vdb
+      targetcli /iscsi create iqn.2023-09.ru.otus:storage.target00
+      targetcli /iscsi/iqn.2023-09.ru.otus:storage.target00/tpg1/luns create /backstores/block/disk01 lun=1
+      targetcli /iscsi/iqn.2023-09.ru.otus:storage.target00/tpg1 set attribute authentication=0
+      targetcli saveconfig
+    creates: "/etc/rtslib-fb-target/saveconfig.json"
+
+- name: Check if config exists
+  ansible.builtin.stat:
+    path: "/etc/rtslib-fb-target/saveconfig.json"
+  register: target_config_state
+
+- name: Read config content
+  ansible.builtin.slurp:
+    src: "/etc/rtslib-fb-target/saveconfig.json"
+  register: target_config_content
+  when: target_config_state.stat.exists
+  
+- name: Check target's ACL
+  include_tasks: "check_target_acl.yaml"
+  loop: "{{ groups['cluster'] }}"   
+  when: target_config_state.stat.exists

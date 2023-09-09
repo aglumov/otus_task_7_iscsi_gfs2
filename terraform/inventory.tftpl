@@ -1,0 +1,7 @@
+[cluster]
+%{ for index, host_ip in nodes_private_ip_list ~}
+node${index}	ansible_host=${host_ip}	instance_id=${nodes_instance_id_list[index]}
+%{ endfor ~}
+
+[iscsi-target]
+iscsi	ansible_host=${iscsi_node_ip}

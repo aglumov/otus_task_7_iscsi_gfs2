@@ -1,0 +1,40 @@
+- name: Setup hostnames
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+    use: "systemd"
+
+- name: Change hosts file
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    block: |
+      {% for item in groups.cluster %}
+      {{hostvars[item].ansible_host}}	{{ hostvars[item].inventory_hostname }}
+      {% endfor %}
+
+- name: Install common packages
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    update_cache: true
+  
+- name: Install aws cli (for fence_aws)
+  ansible.builtin.pip:
+    name: awscli
+
+- name: Create dir for aws config
+  ansible.builtin.file:
+    path: "/root/.aws"
+    state: directory
+
+- name: Setup aws cli
+  ansible.builtin.copy:
+    dest: "/root/.aws/config"
+    content: |
+      [default]
+      output = json
+      region = US
+      endpoint_url = https://api.cloud.croc.ru:443
+
+- name: Setup aws cli
+  ansible.builtin.copy:
+    src: "aws_credentials.conf"
+    dest: "/root/.aws/credentials"

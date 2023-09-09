@@ -1,0 +1,19 @@
+- name: Check line in file
+  ansible.builtin.lineinfile:
+    line: "iqn.2023-09.com.ubuntu:{{ item }}"
+    path: "/etc/rtslib-fb-target/saveconfig.json"
+    search_string: "iqn.2023-09.com.ubuntu:{{ item }}"
+    state: present
+  check_mode: true
+  changed_when: false
+  register: out
+
+- name: debug
+  ansible.builtin.debug:
+    var: out.msg
+
+- name: "Configure ACL for {{ item }}"
+  ansible.builtin.shell:
+    cmd: "targetcli /iscsi/iqn.2023-09.ru.otus:storage.target00/tpg1/acls create iqn.2023-09.com.ubuntu:{{ item }}"
+  when: out.msg != "line replaced"
+  ignore_errors: true

@@ -1,0 +1,22 @@
+- name: Install packages
+  ansible.builtin.apt:
+    name: open-iscsi
+    state: latest
+    update_cache: true
+
+- name: Configure initiator name
+  ansible.builtin.lineinfile:
+    path: "/etc/iscsi/initiatorname.iscsi"
+    search_string: "InitiatorName"
+    line: "InitiatorName=iqn.2023-09.com.ubuntu:{{ inventory_hostname }}"
+
+- name: Discover portal
+  community.general.open_iscsi:
+    discover: true
+    portal: "{{ hostvars['iscsi'].ansible_host }}"
+
+- name: Connect to the target
+  community.general.open_iscsi:
+    login: true
+    target: iqn.2023-09.ru.otus:storage.target00
+    auto_node_startup: true
